@@ -12,8 +12,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'accounts',
-    'gigs',
+    'accounts.apps.AccountsConfig',
+    'gigs.apps.GigsConfig',
+    'applications.apps.ApplicationsConfig',
 ]
 
 MIDDLEWARE = [
@@ -31,7 +32,7 @@ ROOT_URLCONF = 'campusgig.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
