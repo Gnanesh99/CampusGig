@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>{{ gig.title }}</title>
+</head>
+<body>
+    <h1>{{ gig.title }}</h1>
+    <p><strong>Category:</strong> {{ gig.category }}</p>
+    <p><strong>Poster:</strong> {{ gig.poster }}</p>
+    <p><strong>Budget:</strong> {{ gig.budget }}</p>
+    <p><strong>Location:</strong> {{ gig.location }}</p>
+    <p>{{ gig.description }}</p>
+
+    {% if request.user == gig.poster %}
+        <p>
+            <a href="{% url 'gig-update' gig.pk %}">Edit</a> |
+            <a href="{% url 'gig-delete' gig.pk %}">Delete</a>
+        </p>
+    {% endif %}
+</body>
+</html>

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Delete Gig</title>
+</head>
+<body>
+    <h1>Delete Gig</h1>
+    <p>Are you sure you want to delete "{{ object }}"?</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">Confirm Delete</button>
+        <a href="{% url 'gig-detail' object.pk %}">Cancel</a>
+    </form>
+</body>
+</html>

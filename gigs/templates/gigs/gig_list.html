@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Gigs</title>
+</head>
+<body>
+    <h1>Gigs</h1>
+    <a href="{% url 'gig-create' %}">Create Gig</a>
+    <ul>
+        {% for gig in gigs %}
+            <li>
+                <a href="{% url 'gig-detail' gig.pk %}">{{ gig.title }}</a>
+                <span> - {{ gig.category }}</span>
+            </li>
+        {% empty %}
+            <li>No gigs available.</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
