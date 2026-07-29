@@ -2,6 +2,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
+from .forms import GigForm
 from .models import Gig
 
 
@@ -20,7 +21,7 @@ class GigDetailView(DetailView):
 class GigCreateView(LoginRequiredMixin, CreateView):
     model = Gig
     template_name = 'gigs/gig_form.html'
-    fields = ['title', 'description', 'category', 'budget', 'location']
+    form_class = GigForm
     success_url = reverse_lazy('gig-list')
 
     def form_valid(self, form):
@@ -31,7 +32,7 @@ class GigCreateView(LoginRequiredMixin, CreateView):
 class GigUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Gig
     template_name = 'gigs/gig_form.html'
-    fields = ['title', 'description', 'category', 'budget', 'location']
+    form_class = GigForm
     success_url = reverse_lazy('gig-list')
 
     def test_func(self):

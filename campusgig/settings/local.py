@@ -14,3 +14,5 @@ DATABASES = {
         'PORT': os.environ.get('POSTGRES_PORT', '5432'),
     }
 }
+LOGIN_REDIRECT_URL = "/gigs/"
+LOGOUT_REDIRECT_URL = "/accounts/login/"
