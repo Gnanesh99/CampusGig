@@ -8,9 +8,12 @@
     <h1>Applications Received</h1>
     <ul>
         {% for application in applications %}
-            <li>
-                <strong>{{ application.gig.title }}</strong> - {{ application.status }}
-            </li>
+        <li>
+            <a href="{% url 'employer-application-status-update' application.pk %}">
+                <strong>{{ application.gig.title }}</strong>
+            </a>
+            - {{ application.status }}
+        </li>
         {% empty %}
             <li>No applications have been received for your gigs yet.</li>
         {% endfor %}

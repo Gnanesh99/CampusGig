@@ -15,6 +15,7 @@ INSTALLED_APPS = [
     'accounts.apps.AccountsConfig',
     'gigs.apps.GigsConfig',
     'applications.apps.ApplicationsConfig',
+    'payments.apps.PaymentsConfig',
 ]
 
 MIDDLEWARE = [

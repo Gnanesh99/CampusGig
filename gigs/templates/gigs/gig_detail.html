@@ -12,11 +12,18 @@
     <p><strong>Location:</strong> {{ gig.location }}</p>
     <p>{{ gig.description }}</p>
 
-    {% if request.user == gig.poster %}
+    {% if is_owner %}
         <p>
             <a href="{% url 'gig-update' gig.pk %}">Edit</a> |
-            <a href="{% url 'gig-delete' gig.pk %}">Delete</a>
+            <a href="{% url 'gig-delete' gig.pk %}">Delete</a> |
+            <a href="{% url 'employer-application-list' %}">Applications Received</a>
         </p>
+    {% endif %}
+
+    {% if request.user.is_authenticated and not is_owner and not has_applied %}
+        <p><a href="{% url 'application-create' %}">Apply</a></p>
+    {% elif request.user.is_authenticated and has_applied %}
+        <p>Already Applied</p>
     {% endif %}
 </body>
 </html>

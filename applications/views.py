@@ -1,9 +1,9 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.forms import ModelForm
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.views.generic import CreateView, ListView, UpdateView
 
-from .models import Application
+from .models import Application, Assignment
 
 
 class ApplicationCreateView(LoginRequiredMixin, CreateView):
@@ -50,3 +50,18 @@ class EmployerApplicationStatusUpdateView(LoginRequiredMixin, UserPassesTestMixi
 
     def test_func(self):
         return self.get_object().gig.poster == self.request.user
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        application = self.object
+
+        if application.status == 'hired' and not Assignment.objects.filter(application=application).exists():
+            Assignment.objects.create(
+                application=application,
+                employer=application.gig.poster,
+                student=application.applicant,
+                status='Assigned',
+                hired_at=timezone.now(),
+            )
+
+        return response

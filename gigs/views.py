@@ -1,9 +1,18 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
+from django.views.generic import CreateView, DeleteView, DetailView, ListView, TemplateView, UpdateView
 
 from .forms import GigForm
 from .models import Gig
+
+
+class HomePageView(TemplateView):
+    template_name = 'gigs/gig_list.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['gigs'] = Gig.objects.filter().order_by('-created_at')
+        return context
 
 
 class GigListView(ListView):
@@ -16,6 +25,14 @@ class GigDetailView(DetailView):
     model = Gig
     template_name = 'gigs/gig_detail.html'
     context_object_name = 'gig'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        gig = self.object
+        user = self.request.user
+        context['is_owner'] = user.is_authenticated and gig.poster_id == user.id
+        context['has_applied'] = user.is_authenticated and gig.applications.filter(applicant_id=user.id).exists()
+        return context
 
 
 class GigCreateView(LoginRequiredMixin, CreateView):

@@ -26,3 +26,39 @@ class Application(models.Model):
 
     def __str__(self):
         return f"{self.applicant} - {self.gig}"
+
+
+class Assignment(models.Model):
+    STATUS_CHOICES = [
+        ('Assigned', 'Assigned'),
+        ('In Progress', 'In Progress'),
+        ('Submitted', 'Submitted'),
+        ('Completed', 'Completed'),
+    ]
+
+    application = models.OneToOneField(Application, on_delete=models.CASCADE, related_name='assignment')
+    employer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='assigned_applications')
+    student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='student_assignments')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Assigned')
+    hired_at = models.DateTimeField(auto_now_add=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        created = self._state.adding
+        super().save(*args, **kwargs)
+
+        if created:
+            from payments.models import Payment
+
+            Payment.objects.get_or_create(
+                assignment=self,
+                defaults={
+                    'payer': self.employer,
+                    'payee': self.student,
+                    'amount': self.application.gig.budget,
+                    'status': 'Pending',
+                },
+            )
+
+    def __str__(self):
+        return f"Assignment for {self.application}"
