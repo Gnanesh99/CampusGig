@@ -7,7 +7,7 @@ from .models import Application,Assignment
 class ApplicationAdmin(admin.ModelAdmin):
     list_display = ('gig', 'applicant', 'status', 'created_at', 'updated_at')
     list_filter = ('status',)
-    search_fields = ('applicant__username', 'gig__title')
+    search_fields = ('applicant__email', 'gig__title')
 
 @admin.register(Assignment)
 class AssignmentAdmin(admin.ModelAdmin):

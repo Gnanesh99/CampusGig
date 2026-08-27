@@ -42,6 +42,9 @@ class Assignment(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Assigned')
     hired_at = models.DateTimeField(auto_now_add=True)
     completed_at = models.DateTimeField(null=True, blank=True)
+    submission_text = models.TextField(null=True, blank=True)
+    submission_file = models.FileField(upload_to='assignment_submissions/', null=True, blank=True)
+    employer_feedback = models.TextField(null=True, blank=True)
 
     def save(self, *args, **kwargs):
         created = self._state.adding

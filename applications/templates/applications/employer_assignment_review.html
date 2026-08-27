@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Review Submission</title>
+</head>
+<body>
+    <h1>Review Submission</h1>
+
+    <p><strong>Gig:</strong> {{ assignment.application.gig.title }}</p>
+    <p><strong>Student:</strong> {{ assignment.student }}</p>
+    <p><strong>Current Status:</strong> {{ assignment.status }}</p>
+
+    {% if assignment.employer_feedback %}
+    <p><strong>Previous feedback you gave:</strong> {{ assignment.employer_feedback }}</p>
+    {% endif %}
+
+    <hr>
+    <h3>Submitted Work</h3>
+
+    {% if assignment.submission_text %}
+    <p>{{ assignment.submission_text }}</p>
+    {% endif %}
+
+    {% if assignment.submission_file %}
+    <p>
+        <strong>Attached file:</strong>
+        <a href="{{ assignment.submission_file.url }}" target="_blank">
+            {{ assignment.submission_file.name }}
+        </a>
+    </p>
+    {% endif %}
+
+    {% if not assignment.submission_text and not assignment.submission_file %}
+    <p><em>No submission content found.</em></p>
+    {% endif %}
+
+    {% if assignment.status == 'Submitted' %}
+    <hr>
+
+    <!-- REJECT -->
+    <h3>Reject Submission</h3>
+    <form method="post" action="{% url 'employer-assignment-reject' assignment.pk %}">
+        {% csrf_token %}
+        <label for="employer_feedback">Feedback for the student (required for rejection):</label><br>
+        <textarea id="employer_feedback" name="employer_feedback" rows="4" cols="60" required></textarea>
+        <br><br>
+        <button type="submit">Reject and Send Back</button>
+    </form>
+
+    <br>
+
+    <!-- ACCEPT -->
+    <h3>Accept Submission</h3>
+    <p>Accepting will redirect you to the payment page to pay the student.</p>
+    <form method="post" action="{% url 'employer-assignment-accept' assignment.pk %}">
+        {% csrf_token %}
+        <button type="submit">Accept and Proceed to Payment</button>
+    </form>
+    {% else %}
+    <p><em>This assignment is not currently in a Submitted state. No actions available.</em></p>
+    {% endif %}
+
+    <br>
+    <a href="{% url 'employer-assignment-list' %}">Back to my assignments</a>
+</body>
+</html>

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Employer - Assignments</title>
+</head>
+<body>
+    <h1>Assignments</h1>
+
+    <ul>
+        {% for assignment in assignments %}
+        <li>
+            <strong>{{ assignment.application.gig.title }}</strong>
+            &mdash; Student: {{ assignment.student }}
+            &mdash; Status: {{ assignment.status }}
+
+            {% if assignment.status == 'Submitted' %}
+            &mdash; <a href="{% url 'employer-assignment-review' assignment.pk %}">Review Submission</a>
+            {% endif %}
+        </li>
+        {% empty %}
+            <li>No assignments yet.</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

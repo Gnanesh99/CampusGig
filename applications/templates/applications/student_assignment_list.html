@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>My Assignments</title>
+</head>
+<body>
+    <h1>My Assignments</h1>
+
+    <ul>
+        {% for assignment in assignments %}
+        <li>
+            <strong>{{ assignment.application.gig.title }}</strong>
+            &mdash; Status: {{ assignment.status }}
+            &mdash; Employer: {{ assignment.employer }}
+
+            {% if assignment.employer_feedback %}
+            <p><strong>Employer feedback:</strong> {{ assignment.employer_feedback }}</p>
+            {% endif %}
+
+            {% if assignment.status == 'Assigned' %}
+            <form method="post" action="{% url 'student-assignment-start' assignment.pk %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit">Start Assignment</button>
+            </form>
+            {% elif assignment.status == 'In Progress' %}
+            <a href="{% url 'student-assignment-submit' assignment.pk %}">Submit Work</a>
+            {% elif assignment.status == 'Submitted' %}
+            <em>Awaiting employer review.</em>
+            {% elif assignment.status == 'Completed' %}
+            <em>Completed.</em>
+            {% endif %}
+        </li>
+        {% empty %}
+            <li>You have no assignments yet.</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
