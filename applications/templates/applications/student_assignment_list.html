@@ -1,39 +1,71 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <title>My Assignments</title>
-</head>
-<body>
-    <h1>My Assignments</h1>
+{% extends "base.html" %}
 
-    <ul>
-        {% for assignment in assignments %}
-        <li>
-            <strong>{{ assignment.application.gig.title }}</strong>
-            &mdash; Status: {{ assignment.status }}
-            &mdash; Employer: {{ assignment.employer }}
+{% block title %}My Student Assignments - CampusGig{% endblock %}
 
-            {% if assignment.employer_feedback %}
-            <p><strong>Employer feedback:</strong> {{ assignment.employer_feedback }}</p>
-            {% endif %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h1 class="h2 fw-bold mb-1">My Student Assignments</h1>
+        <p class="text-muted mb-0">Track active work, start assignments, and submit completed tasks.</p>
+    </div>
+    <div>
+        <a href="{% url 'student-dashboard' %}" class="btn btn-outline-secondary">Student Dashboard</a>
+    </div>
+</div>
 
-            {% if assignment.status == 'Assigned' %}
-            <form method="post" action="{% url 'student-assignment-start' assignment.pk %}" style="display:inline;">
-                {% csrf_token %}
-                <button type="submit">Start Assignment</button>
-            </form>
-            {% elif assignment.status == 'In Progress' %}
-            <a href="{% url 'student-assignment-submit' assignment.pk %}">Submit Work</a>
-            {% elif assignment.status == 'Submitted' %}
-            <em>Awaiting employer review.</em>
-            {% elif assignment.status == 'Completed' %}
-            <em>Completed.</em>
-            {% endif %}
-        </li>
-        {% empty %}
-            <li>You have no assignments yet.</li>
-        {% endfor %}
-    </ul>
-</body>
-</html>
+<div class="card shadow-sm border-0 bg-white p-3 mb-5">
+    <div class="card-body">
+        {% if assignments %}
+            <div class="list-group list-group-flush">
+                {% for assignment in assignments %}
+                    <div class="list-group-item px-0 py-3">
+                        <div class="d-flex justify-content-between align-items-start mb-2 flex-wrap gap-2">
+                            <div>
+                                <h5 class="mb-1 fw-bold">{{ assignment.application.gig.title }}</h5>
+                                <small class="text-muted">Employer: {{ assignment.employer }}</small>
+                            </div>
+                            <div>
+                                {% if assignment.status == 'Completed' %}
+                                    <span class="badge bg-success">Completed</span>
+                                {% elif assignment.status == 'Submitted' %}
+                                    <span class="badge bg-info text-dark">Submitted</span>
+                                {% elif assignment.status == 'In Progress' %}
+                                    <span class="badge bg-primary">In Progress</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Assigned</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        {% if assignment.employer_feedback %}
+                            <div class="alert alert-warning py-2 px-3 small my-2">
+                                <strong>Employer Feedback / Notes:</strong> {{ assignment.employer_feedback }}
+                            </div>
+                        {% endif %}
+
+                        <div class="mt-3 d-flex justify-content-end align-items-center gap-2">
+                            {% if assignment.status == 'Assigned' %}
+                                <form method="post" action="{% url 'student-assignment-start' assignment.pk %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-primary btn-sm">Start Assignment</button>
+                                </form>
+                            {% elif assignment.status == 'In Progress' %}
+                                <a href="{% url 'student-assignment-submit' assignment.pk %}" class="btn btn-success btn-sm">Submit Work</a>
+                            {% elif assignment.status == 'Submitted' %}
+                                <span class="small text-muted fst-italic">Awaiting employer review...</span>
+                            {% elif assignment.status == 'Completed' %}
+                                <span class="small text-success fw-medium">✓ Completed</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-5 text-muted">
+                <div class="fs-1 mb-2">🎯</div>
+                <p class="mb-0">You have no assignments yet.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

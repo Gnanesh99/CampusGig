@@ -3,9 +3,10 @@ from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy, reverse
 from django.utils import timezone
-from django.views.generic import CreateView, ListView, UpdateView, View
+from django.views.generic import CreateView, ListView, TemplateView, UpdateView, View
 
 from .models import Application, Assignment
+from gigs.models import Gig
 
 
 class ApplicationCreateView(LoginRequiredMixin, CreateView):
@@ -67,6 +68,17 @@ class EmployerApplicationStatusUpdateView(LoginRequiredMixin, UserPassesTestMixi
             )
 
         return response
+
+
+class StudentDashboardView(LoginRequiredMixin, TemplateView):
+    template_name = 'applications/student_dashboard.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        context['applications'] = Application.objects.filter(applicant=user).select_related('gig')
+        context['assignments'] = Assignment.objects.filter(student=user).select_related('application__gig', 'employer')
+        return context
 
 
 class StudentAssignmentListView(LoginRequiredMixin, ListView):
@@ -143,6 +155,18 @@ class StudentAssignmentSubmitView(LoginRequiredMixin, View):
 # ---------------------------------------------------------------------------
 # Employer Assignment views
 # ---------------------------------------------------------------------------
+
+class EmployerDashboardView(LoginRequiredMixin, TemplateView):
+    template_name = 'applications/employer_dashboard.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        context['posted_gigs'] = Gig.objects.filter(poster=user).select_related('category')
+        context['applications_received'] = Application.objects.filter(gig__poster=user).select_related('gig', 'applicant')
+        context['assignments'] = Assignment.objects.filter(employer=user).select_related('application__gig', 'student')
+        return context
+
 
 class EmployerAssignmentListView(LoginRequiredMixin, ListView):
     """Lists all assignments where the logged-in user is the employer."""

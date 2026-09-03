@@ -1,3 +1,1 @@
-"""Load project settings."""
-
-from .local import *
+"""CampusGig settings package."""

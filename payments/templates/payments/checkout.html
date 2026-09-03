@@ -1,89 +1,143 @@
+{% extends "base.html" %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payment Checkout - CampusGig</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
-<div class="container mt-5">
-    <h2>Payment Checkout</h2>
+{% block title %}Payment Checkout - CampusGig{% endblock %}
 
-    {% if error %}
-        <div class="alert alert-danger">{{ error }}</div>
-    {% else %}
-        <div class="card mt-4 p-4">
-            <h4>Gig: {{ payment.assignment.application.gig.title }}</h4>
-            <p><strong>Amount:</strong> ₹{{ payment.amount }}</p>
-            <p><strong>Order ID:</strong> {{ payment.razorpay_order_id }}</p>
+{% block content %}
+<div class="row justify-content-center my-4">
+    <div class="col-lg-7 col-md-9">
+        <div class="card shadow-sm border-0 bg-white p-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h1 class="h3 fw-bold text-dark mb-0">Payment Checkout</h1>
+                    <a href="{% url 'employer-assignment-list' %}" class="btn btn-outline-secondary btn-sm">&larr; Back to Assignments</a>
+                </div>
 
-            <button id="rzp-button1" class="btn btn-primary mt-3">Pay Now</button>
-        </div>
+                {% if error %}
+                    <div class="alert alert-danger mb-4">
+                        <h5 class="alert-heading fw-bold">Payment Error</h5>
+                        <p class="mb-0">{{ error }}</p>
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <a href="{% url 'employer-assignment-list' %}" class="btn btn-primary">Return to Assignments</a>
+                    </div>
+                {% else %}
+                    <!-- Order Summary Box -->
+                    <div class="p-4 bg-light rounded border mb-4">
+                        <h5 class="fw-bold mb-3 text-dark">Order Summary</h5>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <small class="text-muted d-block">Gig Title</small>
+                                <span class="fw-bold text-dark fs-5">{{ payment.assignment.application.gig.title }}</span>
+                            </div>
+                            <div class="col-md-6">
+                                <small class="text-muted d-block">Payee / Student</small>
+                                <span class="fw-medium text-dark">👤 {{ payment.assignment.student }}</span>
+                            </div>
+                            <div class="col-md-6">
+                                <small class="text-muted d-block">Razorpay Order ID</small>
+                                <code class="text-secondary fw-bold">{{ payment.razorpay_order_id }}</code>
+                            </div>
+                            <div class="col-md-6">
+                                <small class="text-muted d-block">Payment Status</small>
+                                <span class="badge bg-warning text-dark">{{ payment.status }}</span>
+                            </div>
+                        </div>
 
-        <!-- Razorpay Checkout Script -->
-        <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-        <script>
-            var options = {
-                "key": "{{ razorpay_key_id }}",
-                "amount": "{{ amount_in_paise }}",
-                "currency": "{{ currency }}",
-                "name": "CampusGig",
-                "description": "Payment for Gig: {{ payment.assignment.application.gig.title }}",
-                "order_id": "{{ payment.razorpay_order_id }}",
-                "handler": function (response){
-                    const verifyUrl = "{% url 'payments:verify' %}";
-                    const csrfToken = "{{ csrf_token }}";
+                        <hr class="my-3">
 
-                    fetch(verifyUrl, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRFToken': csrfToken
-                        },
-                        body: JSON.stringify({
-                            razorpay_payment_id: response.razorpay_payment_id,
-                            razorpay_order_id: response.razorpay_order_id,
-                            razorpay_signature: response.razorpay_signature
-                        })
-                    })
-                    .then(res => res.json())
-                    .then(data => {
-                        if(data.status === 'success' || data.status === 'Already Paid') {
-                            alert('Payment verified successfully!');
-                            window.location.href = "{% url 'home' %}";
-                        } else {
-                            alert('Payment verification failed: ' + (data.error || 'Unknown error'));
+                        <div class="d-flex justify-content-between align-items-center pt-1">
+                            <span class="fs-5 fw-bold text-dark">Total Amount Due</span>
+                            <span class="fs-3 fw-bold text-success">₹{{ payment.amount }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Payment Action Section -->
+                    <div class="card border-primary bg-light mb-4">
+                        <div class="card-body p-4 text-center">
+                            <h5 class="fw-bold mb-2">Complete Payment via Razorpay</h5>
+                            <p class="text-muted small mb-4">Click below to open the secure Razorpay payment gateway modal and complete your payment.</p>
+                            
+                            <button id="rzp-button1" class="btn btn-success btn-lg px-5 py-3 shadow-sm fw-bold">
+                                🔒 Pay ₹{{ payment.amount }} Now
+                            </button>
+
+                            <div id="payment-processing-msg" class="alert alert-info mt-3 d-none text-start">
+                                <div class="d-flex align-items-center">
+                                    <div class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></div>
+                                    <div>Verifying payment with server... Please do not refresh the page.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Razorpay Checkout Script -->
+                    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+                    <script>
+                        var options = {
+                            "key": "{{ razorpay_key_id }}",
+                            "amount": "{{ amount_in_paise }}",
+                            "currency": "{{ currency }}",
+                            "name": "CampusGig",
+                            "description": "Payment for Gig: {{ payment.assignment.application.gig.title }}",
+                            "order_id": "{{ payment.razorpay_order_id }}",
+                            "handler": function (response){
+                                var procMsg = document.getElementById('payment-processing-msg');
+                                if (procMsg) {
+                                    procMsg.classList.remove('d-none');
+                                }
+
+                                const verifyUrl = "{% url 'payments:verify' %}";
+                                const csrfToken = "{{ csrf_token }}";
+
+                                fetch(verifyUrl, {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRFToken': csrfToken
+                                    },
+                                    body: JSON.stringify({
+                                        razorpay_payment_id: response.razorpay_payment_id,
+                                        razorpay_order_id: response.razorpay_order_id,
+                                        razorpay_signature: response.razorpay_signature
+                                    })
+                                })
+                                .then(res => res.json())
+                                .then(data => {
+                                    if(data.status === 'success' || data.status === 'Already Paid') {
+                                        alert('Payment verified successfully!');
+                                        window.location.href = "{% url 'home' %}";
+                                    } else {
+                                        if (procMsg) procMsg.classList.add('d-none');
+                                        alert('Payment verification failed: ' + (data.error || 'Unknown error'));
+                                    }
+                                })
+                                .catch(err => {
+                                    console.error(err);
+                                    if (procMsg) procMsg.classList.add('d-none');
+                                    alert('Server error during verification.');
+                                });
+                            },
+                            "prefill": {
+                                "name": "{{ request.user.get_full_name|default:request.user.email }}",
+                                "email": "{{ request.user.email }}"
+                            },
+                            "theme": {
+                                "color": "#3399cc"
+                            }
+                        };
+                        var rzp1 = new Razorpay(options);
+                        rzp1.on('payment.failed', function (response){
+                            alert('Payment failed: ' + response.error.description);
+                            console.log(response.error);
+                        });
+                        document.getElementById('rzp-button1').onclick = function(e){
+                            rzp1.open();
+                            e.preventDefault();
                         }
-                    })
-                    .catch(err => {
-                        console.error(err);
-                        alert('Server error during verification.');
-                    });
-                },
-                "prefill": {
-                    "name": "{{ request.user.get_full_name|default:request.user.email }}",
-                    "email": "{{ request.user.email }}"
-                },
-                "theme": {
-                    "color": "#3399cc"
-                }
-            };
-            var rzp1 = new Razorpay(options);
-            rzp1.on('payment.failed', function (response){
-                alert('Payment failed: ' + response.error.description);
-                console.log(response.error);
-            });
-            document.getElementById('rzp-button1').onclick = function(e){
-                rzp1.open();
-                e.preventDefault();
-            }
-        </script>
-    {% endif %}
+                    </script>
+                {% endif %}
+            </div>
+        </div>
+    </div>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+{% endblock %}

@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}Student Dashboard - CampusGig{% endblock %}
+
+{% block content %}
+<!-- Welcome / Header Section -->
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h1 class="h2 fw-bold mb-1">Student Dashboard</h1>
+        <p class="text-muted mb-0">Overview of your gig applications and active work assignments.</p>
+    </div>
+    <div>
+        <a href="{% url 'gig-list' %}" class="btn btn-primary">Browse Available Gigs</a>
+    </div>
+</div>
+
+<div class="row g-4 mb-5">
+    <!-- Applications Section -->
+    <div class="col-lg-6">
+        <div class="card shadow-sm border-0 bg-white h-100 p-3">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="card-title fw-bold mb-0">My Applications</h5>
+                    <span class="badge bg-light text-dark border">{{ applications|length }} Total</span>
+                </div>
+
+                {% if applications %}
+                    <div class="list-group list-group-flush">
+                        {% for app in applications %}
+                            <div class="list-group-item px-0 py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                <div>
+                                    <h6 class="mb-1 fw-bold">
+                                        <a href="{% url 'gig-detail' app.gig.pk %}" class="text-decoration-none text-dark">{{ app.gig.title }}</a>
+                                    </h6>
+                                    <small class="text-muted">Applied on {{ app.created_at|date:"M d, Y" }}</small>
+                                </div>
+                                <div>
+                                    {% if app.status == 'hired' %}
+                                        <span class="badge bg-success">Hired</span>
+                                    {% elif app.status == 'shortlisted' %}
+                                        <span class="badge bg-info text-dark">Shortlisted</span>
+                                    {% elif app.status == 'rejected' %}
+                                        <span class="badge bg-danger">Rejected</span>
+                                    {% else %}
+                                        <span class="badge bg-warning text-dark">Pending</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-5 text-muted">
+                        <div class="fs-1 mb-2">📋</div>
+                        <p class="mb-3">You haven't applied to any gigs yet.</p>
+                        <a href="{% url 'gig-list' %}" class="btn btn-sm btn-outline-primary">Find Gigs to Apply</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Assignments Section -->
+    <div class="col-lg-6">
+        <div class="card shadow-sm border-0 bg-white h-100 p-3">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="card-title fw-bold mb-0">My Assignments</h5>
+                    <a href="{% url 'student-assignment-list' %}" class="btn btn-sm btn-link text-decoration-none">View All &rarr;</a>
+                </div>
+
+                {% if assignments %}
+                    <div class="list-group list-group-flush">
+                        {% for assignment in assignments %}
+                            <div class="list-group-item px-0 py-3">
+                                <div class="d-flex justify-content-between align-items-start mb-2 flex-wrap gap-2">
+                                    <div>
+                                        <h6 class="mb-1 fw-bold">
+                                            <a href="{% url 'gig-detail' assignment.application.gig.pk %}" class="text-decoration-none text-dark">{{ assignment.application.gig.title }}</a>
+                                        </h6>
+                                        <small class="text-muted">Employer: {{ assignment.employer }}</small>
+                                    </div>
+                                    <div>
+                                        {% if assignment.status == 'Completed' %}
+                                            <span class="badge bg-success">Completed</span>
+                                        {% elif assignment.status == 'Submitted' %}
+                                            <span class="badge bg-info text-dark">Submitted</span>
+                                        {% elif assignment.status == 'In Progress' %}
+                                            <span class="badge bg-primary">In Progress</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Assigned</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                {% if assignment.employer_feedback %}
+                                    <div class="alert alert-warning py-2 px-3 small my-2">
+                                        <strong>Feedback:</strong> {{ assignment.employer_feedback }}
+                                    </div>
+                                {% endif %}
+
+                                <div class="mt-2 text-end">
+                                    {% if assignment.status == 'Assigned' %}
+                                        <form method="post" action="{% url 'student-assignment-start' assignment.pk %}" class="d-inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm btn-primary">Start Assignment</button>
+                                        </form>
+                                    {% elif assignment.status == 'In Progress' %}
+                                        <a href="{% url 'student-assignment-submit' assignment.pk %}" class="btn btn-sm btn-success">Submit Work</a>
+                                    {% elif assignment.status == 'Submitted' %}
+                                        <span class="small text-muted fst-italic">Awaiting employer review</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-5 text-muted">
+                        <div class="fs-1 mb-2">🎯</div>
+                        <p class="mb-0">No active assignments assigned yet.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

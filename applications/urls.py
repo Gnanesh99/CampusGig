@@ -4,9 +4,11 @@ from .views import (
     ApplicationCreateView,
     EmployerApplicationListView,
     EmployerApplicationStatusUpdateView,
+    StudentDashboardView,
     StudentAssignmentListView,
     StudentAssignmentStartView,
     StudentAssignmentSubmitView,
+    EmployerDashboardView,
     EmployerAssignmentListView,
     EmployerAssignmentReviewView,
     EmployerAssignmentRejectView,
@@ -15,7 +17,9 @@ from .views import (
 
 urlpatterns = [
     path('create/', ApplicationCreateView.as_view(), name='application-create'),
+    path('dashboard/', StudentDashboardView.as_view(), name='student-dashboard'),
     path('employer/', EmployerApplicationListView.as_view(), name='employer-application-list'),
+    path('employer/dashboard/', EmployerDashboardView.as_view(), name='employer-dashboard'),
     path('employer/<int:pk>/status/', EmployerApplicationStatusUpdateView.as_view(), name='employer-application-status-update'),
     # Student assignment routes
     path('assignments/', StudentAssignmentListView.as_view(), name='student-assignment-list'),

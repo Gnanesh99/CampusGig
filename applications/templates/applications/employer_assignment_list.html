@@ -1,26 +1,49 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <title>Employer - Assignments</title>
-</head>
-<body>
-    <h1>Assignments</h1>
+{% extends "base.html" %}
 
-    <ul>
-        {% for assignment in assignments %}
-        <li>
-            <strong>{{ assignment.application.gig.title }}</strong>
-            &mdash; Student: {{ assignment.student }}
-            &mdash; Status: {{ assignment.status }}
+{% block title %}Employer Assignments - CampusGig{% endblock %}
 
-            {% if assignment.status == 'Submitted' %}
-            &mdash; <a href="{% url 'employer-assignment-review' assignment.pk %}">Review Submission</a>
-            {% endif %}
-        </li>
-        {% empty %}
-            <li>No assignments yet.</li>
-        {% endfor %}
-    </ul>
-</body>
-</html>
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h1 class="h2 fw-bold mb-1">Employer Assignments</h1>
+        <p class="text-muted mb-0">Track student progress and review submitted work for your gigs.</p>
+    </div>
+    <div>
+        <a href="{% url 'employer-dashboard' %}" class="btn btn-outline-secondary">Employer Dashboard</a>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 bg-white p-3 mb-5">
+    <div class="card-body">
+        {% if assignments %}
+            <div class="list-group list-group-flush">
+                {% for assignment in assignments %}
+                    <div class="list-group-item px-0 py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <div>
+                            <h5 class="mb-1 fw-bold">{{ assignment.application.gig.title }}</h5>
+                            <small class="text-muted">Student: {{ assignment.student }}</small>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            {% if assignment.status == 'Completed' %}
+                                <span class="badge bg-success">Completed</span>
+                            {% elif assignment.status == 'Submitted' %}
+                                <span class="badge bg-info text-dark">Submitted</span>
+                                <a href="{% url 'employer-assignment-review' assignment.pk %}" class="btn btn-sm btn-success">Review Submission</a>
+                            {% elif assignment.status == 'In Progress' %}
+                                <span class="badge bg-primary">In Progress</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Assigned</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-5 text-muted">
+                <div class="fs-1 mb-2">💼</div>
+                <p class="mb-0">No assignments created yet.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

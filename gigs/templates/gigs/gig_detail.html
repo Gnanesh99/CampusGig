@@ -1,29 +1,88 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <title>{{ gig.title }}</title>
-</head>
-<body>
-    <h1>{{ gig.title }}</h1>
-    <p><strong>Category:</strong> {{ gig.category }}</p>
-    <p><strong>Poster:</strong> {{ gig.poster }}</p>
-    <p><strong>Budget:</strong> {{ gig.budget }}</p>
-    <p><strong>Location:</strong> {{ gig.location }}</p>
-    <p>{{ gig.description }}</p>
+{% extends "base.html" %}
 
-    {% if is_owner %}
-        <p>
-            <a href="{% url 'gig-update' gig.pk %}">Edit</a> |
-            <a href="{% url 'gig-delete' gig.pk %}">Delete</a> |
-            <a href="{% url 'employer-application-list' %}">Applications Received</a>
-        </p>
-    {% endif %}
+{% block title %}{{ gig.title }} - CampusGig{% endblock %}
 
-    {% if request.user.is_authenticated and not is_owner and not has_applied %}
-        <p><a href="{% url 'application-create' %}">Apply</a></p>
-    {% elif request.user.is_authenticated and has_applied %}
-        <p>Already Applied</p>
-    {% endif %}
-</body>
-</html>
+{% block content %}
+<div class="mb-4">
+    <a href="{% url 'gig-list' %}" class="text-decoration-none text-muted">&larr; Back to Gigs</a>
+</div>
+
+{% if is_owner %}
+    <div class="card mb-4 border-warning bg-light">
+        <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <span class="badge bg-warning text-dark me-2">Gig Owner</span>
+                <strong>Management Options</strong>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+                <a href="{% url 'gig-update' gig.pk %}" class="btn btn-sm btn-outline-primary">Edit Gig</a>
+                <a href="{% url 'gig-delete' gig.pk %}" class="btn btn-sm btn-outline-danger">Delete Gig</a>
+                <a href="{% url 'employer-application-list' %}" class="btn btn-sm btn-outline-secondary">Applications Received</a>
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+<div class="row g-4 mb-5">
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0 bg-white p-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
+                    <span class="badge bg-secondary fs-6">{{ gig.category.name }}</span>
+                    {% if gig.created_at %}
+                        <small class="text-muted">Posted {{ gig.created_at|date:"M d, Y" }}</small>
+                    {% endif %}
+                </div>
+
+                <h1 class="h2 fw-bold text-dark mb-4">{{ gig.title }}</h1>
+
+                <h5 class="fw-bold mb-3">Gig Description</h5>
+                <div class="text-secondary lh-lg mb-4">
+                    {{ gig.description|linebreaks }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card shadow-sm border-0 bg-white p-4">
+            <div class="card-body">
+                <h5 class="card-title fw-bold mb-4">Gig Summary</h5>
+
+                <div class="mb-3">
+                    <small class="text-muted d-block">Budget</small>
+                    {% if gig.budget %}
+                        <span class="fs-4 fw-bold text-success">₹{{ gig.budget }}</span>
+                    {% else %}
+                        <span class="fs-5 text-muted">Negotiable</span>
+                    {% endif %}
+                </div>
+
+                <hr>
+
+                <div class="mb-3">
+                    <small class="text-muted d-block">Location</small>
+                    <span class="fw-medium text-dark">📍 {{ gig.location }}</span>
+                </div>
+
+                <hr>
+
+                <div class="mb-4">
+                    <small class="text-muted d-block">Employer / Poster</small>
+                    <span class="fw-medium text-dark">👤 {{ gig.poster }}</span>
+                </div>
+
+                <div class="d-grid gap-2">
+                    {% if request.user.is_authenticated and not is_owner and not has_applied %}
+                        <a href="{% url 'application-create' %}" class="btn btn-success btn-lg">Apply for this Gig</a>
+                    {% elif request.user.is_authenticated and has_applied %}
+                        <button class="btn btn-secondary btn-lg" disabled>Already Applied</button>
+                    {% elif not request.user.is_authenticated %}
+                        <a href="{% url 'login' %}" class="btn btn-primary btn-lg">Login to Apply</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
