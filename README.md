@@ -119,6 +119,9 @@ The `production` settings are configured for a PythonAnywhere-style deployment u
 ```bash
 python manage.py collectstatic --noinput
 ```
+But check that PythonAnywhere does not support PostgreSQL freely and it also does not support external database connections, so this project was deployed in  Render.
+
+https://campusgig-e5w8.onrender.com/
 
 ## Contributing
 
